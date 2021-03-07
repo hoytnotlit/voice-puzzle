@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 import { Machine, assign, actions, State } from "xstate";
 import { useMachine, asEffect } from "@xstate/react";
 import { inspect } from "@xstate/inspect";
-import { dmMachine } from "./dmAppointmentVG";
+import { dmMachine } from "./dmPuzzle";
 const { send, cancel } = actions;
 
 inspect({
@@ -162,6 +162,17 @@ function App() {
     return (
         <div className="App">
             <ReactiveButton state={current} onClick={() => send('CLICK')} />
+            <div className="board">
+                <div className="top-left"></div>
+                <div className="top-center"></div>
+                <div className="top-right"></div>
+                <div className="middle-left"></div>
+                <div className="middle-center"></div>
+                <div className="middle-right"></div>
+                <div className="bottom-left"></div>
+                <div className="bottom-center"></div>
+                <div className="bottom-right"></div>
+            </div>
         </div>
     )
 };
