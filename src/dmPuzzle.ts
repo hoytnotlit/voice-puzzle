@@ -1,6 +1,6 @@
 import { MachineConfig, send, Action, assign } from "xstate";
 
-// TODO use srgs grammar - no need for rasa because the grammar for moves is not so large
+// use srgs grammar - TODO or maybe rasa would be handier?
 import { loadGrammar } from './runparser'
 import { parse } from './chartparser'
 import { grammar } from './grammars/puzzleGrammar'

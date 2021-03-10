@@ -89,6 +89,7 @@ const machine = Machine<SDSContext, any, SDSEvent>({
 interface Props extends React.HTMLAttributes<HTMLElement> {
     state: State<SDSContext, any, any, any>;
 }
+
 const ReactiveButton = (props: Props): JSX.Element => {
     switch (true) {
         case props.state.matches({ asrtts: 'recognising' }):
@@ -107,8 +108,8 @@ const ReactiveButton = (props: Props): JSX.Element => {
             );
         default:
             return (
-                <button type="button" className="glow-on-hover" {...props}>
-                    Click to start
+                <button type="button" className="start-btn" {...props}>
+                    Click to play
                 </button >
             );
     }
@@ -152,12 +153,17 @@ function App() {
                 const piece = document.getElementById(pieceId);
                 const degree = context.degree;
 
-                if (piece)
+                if (piece) {
+                    //TODO add/subtract from currDegree
+                    let currDegree = piece.style.transform;
                     piece.style.transform = `rotate(${degree}deg)`;
+                }
             }),
             shufflePieces: asEffect((context) => {
                 const board = document.getElementById("board");
                 if (board) {
+                    board.classList.add("playing");
+
                     const pieces = board.children;
 
                     for (let i = 0; i < pieces.length; i++) {
@@ -208,28 +214,25 @@ function App() {
     )
 };
 
-
-
-/* RASA API
- *  */
-const proxyurl = "https://cors-anywhere.herokuapp.com/";
-const rasaurl = 'https://gussuvmi-rasa-nlu.herokuapp.com/model/parse';
-const origin = location.origin;
-
-export const nluRequest = (text: string) =>
-    fetch(new Request(proxyurl + rasaurl, {
-        method: 'POST',
-        headers: {
-            'Origin': origin //'http://maraev.me'
-        }, // only required with proxy
-        body: `{"text": "${text}"}`
-    }))
-        .then(data => data.json());
-
-
-
-
 const rootElement = document.getElementById("root");
 ReactDOM.render(
     <App />,
     rootElement);
+
+
+
+/* RASA API
+ *  */
+// const proxyurl = "https://cors-anywhere.herokuapp.com/";
+// const rasaurl = 'https://gussuvmi-rasa-nlu.herokuapp.com/model/parse';
+// const origin = location.origin;
+
+// export const nluRequest = (text: string) =>
+//     fetch(new Request(proxyurl + rasaurl, {
+//         method: 'POST',
+//         headers: {
+//             'Origin': origin //'http://maraev.me'
+//         }, // only required with proxy
+//         body: `{"text": "${text}"}`
+//     }))
+//         .then(data => data.json());

@@ -4,14 +4,43 @@ body {
   text-align: center;
 }
 
+.start-btn {
+  top: 50%;
+  left: calc(50% - 70px); /* to center horizontally substract half of btn width*/
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  position: absolute;
+  z-index: 1;
+  width: 140px;
+  padding: 10px 30px;
+  border-radius: 0;
+  text-transform: uppercase;
+  opacity: 0.8;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 1;
+  }
+}
+
 .board {
   font-size: 1vmin;
   width: 60em;
   height: 60em;
   position: absolute;
   left: calc(50% - 30em);
-  top: calc(50% - 30em);
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  // top: calc(50% - 30em);
   overflow: hidden;
+
+  &.playing {
+    div::after {
+      border: 1px solid;
+      // filter: none;
+    }
+  }
 
   div {
     position: absolute;
@@ -25,11 +54,13 @@ body {
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 10;
+      // z-index: 10;
       background-size: 60em 60em;
       box-sizing: box-border;
       background-image: url("IMG_20200828_135026.jpg");
-      border: 1px solid;
+      // border: 1px solid;
+      // filter: blur(8px);
+      // -webkit-filter: blur(8px);
     }
   }
 }
