@@ -40,7 +40,6 @@ body {
 
   &::after {
     background-position: top left;
-    transform: rotate(90deg);
   }
 }
 
@@ -49,7 +48,6 @@ body {
   top: 0em;
   &::after {
     background-position: top center;
-    transform: rotate(180deg);
   }
 }
 
@@ -58,7 +56,6 @@ body {
   top: 0em;
   &::after {
     background-position: top right;
-    transform: rotate(90deg);
   }
 }
 

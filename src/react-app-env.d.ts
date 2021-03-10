@@ -6,12 +6,8 @@ interface SDSContext {
     recResult: string;
     nluData: any;
     ttsAgenda: string;
-    person: string,
-    day: string,
-    time: string,
-    smarthome_action: any,
-    help_msg: string,
-    prompts: number
+    piece: string;
+    degree: number;
 }
 
 type SDSEvent =

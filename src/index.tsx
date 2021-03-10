@@ -45,7 +45,7 @@ const machine = Machine<SDSContext, any, SDSEvent>({
                             target: '.match'
                         },
                         RECOGNISED: {
-                            actions: [cancel('maxsp'), assign((context: SDSContext) => { return { prompts: 0 } })],
+                            actions: [cancel('maxsp')/*, assign((context: SDSContext) => { return { prompts: 0 } })*/],
                             target: 'idle'
                         },
                         MAXSPEECH: 'idle'
@@ -139,10 +139,6 @@ function App() {
                 console.log('Recognition stopped.');
                 stop()
             }),
-            changeColour: asEffect((context) => {
-                console.log('Repainting...');
-                document.body.style.background = context.recResult;
-            }),
             ttsStart: asEffect((context, effect) => {
                 console.log('Speaking...');
                 speak({ text: context.ttsAgenda })
@@ -150,11 +146,46 @@ function App() {
             ttsCancel: asEffect((context, effect) => {
                 console.log('TTS STOP...');
                 cancel()
-            })
-            /* speak: asEffect((context) => {
-         * console.log('Speaking...');
-             *     speak({text: context.ttsAgenda })
-             * } */
+            }),
+            rotatePiece: asEffect((context) => {
+                const pieceId = context.piece;
+                const piece = document.getElementById(pieceId);
+                const degree = context.degree;
+
+                if (piece)
+                    piece.style.transform = `rotate(${degree}deg)`;
+            }),
+            shufflePieces: asEffect((context) => {
+                const board = document.getElementById("board");
+                if (board) {
+                    const pieces = board.children;
+
+                    for (let i = 0; i < pieces.length; i++) {
+                        // TODO include 0 here or not?
+                        const degrees = [0, 90, 180, 270];
+                        let randomDegree = degrees[Math.floor(Math.random() * degrees.length)];;
+                        const htmlElement = document.getElementById(pieces[i].id);
+
+                        // typescript forcing strict null checks
+                        if (htmlElement)
+                            htmlElement.style.transform = `rotate(${randomDegree}deg)`;
+                    }
+                }
+            }),
+            resetBoard: asEffect((context) => {
+                const board = document.getElementById("board");
+                if (board) {
+                    const pieces = board.children;
+
+                    for (let i = 0; i < pieces.length; i++) {
+                        const htmlElement = document.getElementById(pieces[i].id);
+
+                        // typescript forcing strict null checks
+                        if (htmlElement)
+                            htmlElement.style.transform = "rotate(0)";
+                    }
+                }
+            }),
         }
     });
 
@@ -162,16 +193,16 @@ function App() {
     return (
         <div className="App">
             <ReactiveButton state={current} onClick={() => send('CLICK')} />
-            <div className="board">
-                <div className="top-left"></div>
-                <div className="top-center"></div>
-                <div className="top-right"></div>
-                <div className="middle-left"></div>
-                <div className="middle-center"></div>
-                <div className="middle-right"></div>
-                <div className="bottom-left"></div>
-                <div className="bottom-center"></div>
-                <div className="bottom-right"></div>
+            <div className="board" id="board">
+                <div className="top-left" id="top-left"></div>
+                <div className="top-center" id="top-center"></div>
+                <div className="top-right" id="top-right"></div>
+                <div className="middle-left" id="middle-left"></div>
+                <div className="middle-center" id="middle-center"></div>
+                <div className="middle-right" id="middle-right"></div>
+                <div className="bottom-left" id="bottom-left"></div>
+                <div className="bottom-center" id="bottom-center"></div>
+                <div className="bottom-right" id="bottom-right"></div>
             </div>
         </div>
     )
