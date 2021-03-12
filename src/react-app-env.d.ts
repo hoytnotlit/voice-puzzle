@@ -7,7 +7,8 @@ interface SDSContext {
     nluData: any;
     ttsAgenda: string;
     piece: string;
-    degree: number;
+    degree: string;
+    direction: string;
 }
 
 type SDSEvent =

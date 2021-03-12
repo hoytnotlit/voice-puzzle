@@ -151,11 +151,19 @@ function App() {
             rotatePiece: asEffect((context) => {
                 const pieceId = context.piece;
                 const piece = document.getElementById(pieceId);
-                const degree = context.degree;
+                // const degree = context.degree;
 
                 if (piece) {
-                    //TODO add/subtract from currDegree
-                    let currDegree = piece.style.transform;
+                    // add or subtract degree and current degree
+                    let currDegree = piece.style.transform.match(/\d+/)[0];
+                    let degree = parseInt(currDegree) + parseInt(context.degree);
+                    
+                    // don't exceed 360deg
+                    if (degree === 360)
+                        degree = 0;
+
+                    if (degree > 360)
+                        degree = parseInt(currDegree) - parseInt(context.degree);
                     piece.style.transform = `rotate(${degree}deg)`;
                 }
             }),
@@ -165,10 +173,10 @@ function App() {
                     board.classList.add("playing");
 
                     const pieces = board.children;
+                    // TODO include 0 here or not?
+                    const degrees = [0, 90, 180, 270];
 
                     for (let i = 0; i < pieces.length; i++) {
-                        // TODO include 0 here or not?
-                        const degrees = [0, 90, 180, 270];
                         let randomDegree = degrees[Math.floor(Math.random() * degrees.length)];;
                         const htmlElement = document.getElementById(pieces[i].id);
 

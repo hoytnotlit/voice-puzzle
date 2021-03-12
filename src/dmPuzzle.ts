@@ -84,7 +84,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             on: { ENDSPEECH: "listen" },
                             entry: send((context) => ({
                                 type: "SPEAK",
-                                value: "How many degrees do you want to rotate it?"
+                                value: "How much do you want to rotate it?"
                             })),
                         },
                         listen: {
