@@ -9,82 +9,90 @@ const { send, cancel } = actions;
 
 inspect({
     url: "https://statecharts.io/inspect",
-    iframe: false
+    iframe: false,
 });
 
-import { useSpeechSynthesis, useSpeechRecognition } from 'react-speech-kit';
+import { useSpeechSynthesis, useSpeechRecognition } from "react-speech-kit";
 
-
-const machine = Machine<SDSContext, any, SDSEvent>({
-    id: 'root',
-    type: 'parallel',
-    states: {
-        dm: {
-            ...dmMachine
-        },
-        asrtts: {
-            initial: 'idle',
-            states: {
-                idle: {
-                    on: {
-                        LISTEN: 'recognising',
-                        SPEAK: {
-                            target: 'speaking',
-                            actions: assign((_context, event) => { return { ttsAgenda: event.value } })
-                        }
-                    }
-                },
-                recognising: {
-                    initial: 'progress',
-                    entry: 'recStart',
-                    exit: 'recStop',
-                    on: {
-                        ASRRESULT: {
-                            actions: ['recLogResult',
-                                assign((_context, event) => { return { recResult: event.value } })],
-                            target: '.match'
+const machine = Machine<SDSContext, any, SDSEvent>(
+    {
+        id: "root",
+        type: "parallel",
+        states: {
+            dm: {
+                ...dmMachine,
+            },
+            asrtts: {
+                initial: "idle",
+                states: {
+                    idle: {
+                        on: {
+                            LISTEN: "recognising",
+                            SPEAK: {
+                                target: "speaking",
+                                actions: assign((_context, event) => {
+                                    return { ttsAgenda: event.value };
+                                }),
+                            },
                         },
-                        RECOGNISED: {
-                            actions: [cancel('maxsp')/*, assign((context: SDSContext) => { return { prompts: 0 } })*/],
-                            target: 'idle'
-                        },
-                        MAXSPEECH: 'idle'
                     },
-                    states: {
-                        progress: {
+                    recognising: {
+                        initial: "progress",
+                        entry: "recStart",
+                        exit: "recStop",
+                        on: {
+                            ASRRESULT: {
+                                actions: [
+                                    "recLogResult",
+                                    assign((_context, event) => {
+                                        return { recResult: event.value };
+                                    }),
+                                ],
+                                target: ".match",
+                            },
+                            RECOGNISED: {
+                                actions: [
+                                    cancel(
+                                        "maxsp"
+                                    ) /*, assign((context: SDSContext) => { return { prompts: 0 } })*/,
+                                ],
+                                target: "idle",
+                            },
+                            MAXSPEECH: "idle",
                         },
-                        match: {
-                            entry: send('RECOGNISED'),
+                        states: {
+                            progress: {},
+                            match: {
+                                entry: send("RECOGNISED"),
+                            },
                         },
-                    }
+                    },
+                    speaking: {
+                        entry: "ttsStart",
+                        on: {
+                            ENDSPEECH: "idle",
+                        },
+                    },
                 },
-                speaking: {
-                    entry: 'ttsStart',
-                    on: {
-                        ENDSPEECH: 'idle',
-                    }
-                }
-            }
-        }
+            },
+        },
     },
-},
     {
         actions: {
             recLogResult: (context: SDSContext) => {
                 /* context.recResult = event.recResult; */
-                console.log('<< ASR: ' + context.recResult);
+                console.log("<< ASR: " + context.recResult);
             },
             test: () => {
-                console.log('test')
+                console.log("test");
             },
             logIntent: (context: SDSContext) => {
                 /* context.nluData = event.data */
-                console.log('<< NLU intent: ' + context.nluData.intent.name)
-            }
+                console.log("<< NLU intent: " + context.nluData.intent.name);
+            },
         },
-    });
-
-
+    }
+);
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
     state: State<SDSContext, any, any, any>;
@@ -92,17 +100,25 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const ReactiveButton = (props: Props): JSX.Element => {
     switch (true) {
-        case props.state.matches({ asrtts: 'recognising' }):
+        case props.state.matches({ asrtts: "recognising" }):
             return (
-                <button type="button" className="glow-on-hover"
-                    style={{ animation: "glowing 20s linear" }} {...props}>
+                <button
+                    type="button"
+                    className="glow-on-hover"
+                    style={{ animation: "glowing 20s linear" }}
+                    {...props}
+                >
                     Listening...
                 </button>
             );
-        case props.state.matches({ asrtts: 'speaking' }):
+        case props.state.matches({ asrtts: "speaking" }):
             return (
-                <button type="button" className="glow-on-hover"
-                    style={{ animation: "bordering 1s infinite" }} {...props}>
+                <button
+                    type="button"
+                    className="glow-on-hover"
+                    style={{ animation: "bordering 1s infinite" }}
+                    {...props}
+                >
                     Speaking...
                 </button>
             );
@@ -110,15 +126,15 @@ const ReactiveButton = (props: Props): JSX.Element => {
             return (
                 <button type="button" className="start-btn" {...props}>
                     Click to play
-                </button >
+                </button>
             );
     }
-}
+};
 
 function App() {
     const { speak, cancel, speaking } = useSpeechSynthesis({
         onEnd: () => {
-            send('ENDSPEECH');
+            send("ENDSPEECH");
         },
     });
     const { listen, listening, stop } = useSpeechRecognition({
@@ -130,41 +146,43 @@ function App() {
         devTools: true,
         actions: {
             recStart: asEffect(() => {
-                console.log('Ready to receive a command.');
+                console.log("Ready to receive a command.");
                 listen({
                     interimResults: false,
-                    continuous: true
+                    continuous: true,
                 });
             }),
             recStop: asEffect(() => {
-                console.log('Recognition stopped.');
-                stop()
+                console.log("Recognition stopped.");
+                stop();
             }),
             ttsStart: asEffect((context, effect) => {
-                console.log('Speaking...');
-                speak({ text: context.ttsAgenda })
+                console.log("Speaking...");
+                speak({ text: context.ttsAgenda });
             }),
             ttsCancel: asEffect((context, effect) => {
-                console.log('TTS STOP...');
-                cancel()
+                console.log("TTS STOP...");
+                cancel();
             }),
             rotatePiece: asEffect((context) => {
                 const pieceId = context.piece;
                 const piece = document.getElementById(pieceId);
-                // const degree = context.degree;
 
                 if (piece) {
+                    // TODO implement direction
+                    
                     // add or subtract degree and current degree
                     let currDegree = piece.style.transform.match(/\d+/)[0];
                     let degree = parseInt(currDegree) + parseInt(context.degree);
-                    
+
                     // don't exceed 360deg
-                    if (degree === 360)
-                        degree = 0;
+                    if (degree === 360) degree = 0;
 
                     if (degree > 360)
                         degree = parseInt(currDegree) - parseInt(context.degree);
                     piece.style.transform = `rotate(${degree}deg)`;
+                    // remove selected class
+                    piece.classList.remove("selected");
                 }
             }),
             shufflePieces: asEffect((context) => {
@@ -177,7 +195,8 @@ function App() {
                     const degrees = [0, 90, 180, 270];
 
                     for (let i = 0; i < pieces.length; i++) {
-                        let randomDegree = degrees[Math.floor(Math.random() * degrees.length)];;
+                        let randomDegree =
+                            degrees[Math.floor(Math.random() * degrees.length)];
                         const htmlElement = document.getElementById(pieces[i].id);
 
                         // typescript forcing strict null checks
@@ -195,18 +214,27 @@ function App() {
                         const htmlElement = document.getElementById(pieces[i].id);
 
                         // typescript forcing strict null checks
-                        if (htmlElement)
-                            htmlElement.style.transform = "rotate(0)";
+                        if (htmlElement) htmlElement.style.transform = "rotate(0)";
                     }
                 }
             }),
-        }
-    });
+            selectPiece: asEffect((context) => {
+                const pieceId = context.piece;
+                const piece = document.getElementById(pieceId);
 
+                if (piece) {
+                    // apply selected styles to piece
+                    let transformVal = piece.style.transform + " scale(1.1)";
+                    piece.style.transform = transformVal;
+                    piece.classList.add("selected");
+                }
+            }),
+        },
+    });
 
     return (
         <div className="App">
-            <ReactiveButton state={current} onClick={() => send('CLICK')} />
+            <ReactiveButton state={current} onClick={() => send("CLICK")} />
             <div className="board" id="board">
                 <div className="top-left" id="top-left"></div>
                 <div className="top-center" id="top-center"></div>
@@ -219,15 +247,11 @@ function App() {
                 <div className="bottom-right" id="bottom-right"></div>
             </div>
         </div>
-    )
-};
+    );
+}
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(
-    <App />,
-    rootElement);
-
-
+ReactDOM.render(<App />, rootElement);
 
 /* RASA API
  *  */

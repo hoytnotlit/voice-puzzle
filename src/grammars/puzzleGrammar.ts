@@ -10,7 +10,8 @@ export const grammar = `
    <item repeat="0-1">
    <ruleref uri="#direction"/>
    </item>
-   <tag>out.puzzleMove = new Object(); out.puzzleMove.piece=rules.piece;out.puzzleMove.degree=rules.degree;</tag>
+   <tag>out.puzzleMove = new Object(); out.puzzleMove.piece=rules.piece;
+   out.puzzleMove.degree=rules.degree; out.puzzleMove.direction=rules.direction;</tag>
 </rule>
 <rule id="piece">
    <one-of>
@@ -27,13 +28,14 @@ export const grammar = `
 </rule>
 <rule id="degree">
    <one-of>
-      <item>90</item>
+      <item>0<tag>out=0;</tag></item>
+      <item>90<tag>out=90;</tag></item>
+      <item>180<tag>out=180;</tag></item>
+      <item>270<tag>out=270;</tag></item>
+      <item>360<tag>out=360;</tag></item>
       <item>once <tag>out=90;</tag></item>
-      <item>180</item>
       <item>twice <tag>out=180;</tag></item>
-      <item>270</item>
       <item>three times <tag>out=270;</tag></item>
-      <item>360</item> 
    </one-of>
 </rule>
 <rule id="direction">

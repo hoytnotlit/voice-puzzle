@@ -15,6 +15,10 @@ function getGrammarResult(recResult: string) {
         res.resultsForRule(gram.$root)[0].puzzleMove : {};
 }
 
+function ask(prompt: string) {
+    // TODO
+}
+
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
     initial: 'init',
     states: {
@@ -47,7 +51,8 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                                 }),
                             },
                             {
-                                target: '#play.degree',
+                                target: "#root.dm.select",
+                                // target: '#play.degree',
                                 cond: (context) => getGrammarResult(context.recResult) && getGrammarResult(context.recResult).piece,
                                 actions: assign((context) => { return { piece: getGrammarResult(context.recResult).piece } }),
                             },
@@ -72,7 +77,8 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                     on: {
                         RECOGNISED: [
                             {
-                                target: '#root.dm.rotate',
+                                target: '#play.direction',
+                                // target: '#root.dm.rotate',
                                 cond: (context) => getGrammarResult(context.recResult).degree,
                                 actions: assign((context) => { return { degree: getGrammarResult(context.recResult).degree } }),
                             },
@@ -91,12 +97,41 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             entry: send('LISTEN')
                         }
                     }
+                },
+                direction: {
+                    initial: "prompt",
+                    on: {
+                        RECOGNISED: [
+                            {
+                                target: '#root.dm.rotate',
+                                cond: (context) => getGrammarResult(context.recResult).direction,
+                                actions: assign((context) => { return { direction: getGrammarResult(context.recResult).direction } }),
+                            },
+                            { target: ".prompt" }
+                        ]
+                    },
+                    states: {
+                        prompt: {
+                            on: { ENDSPEECH: "listen" },
+                            entry: send((context) => ({
+                                type: "SPEAK",
+                                value: "In which direction should I rotate it?"
+                            })),
+                        },
+                        listen: {
+                            entry: send('LISTEN')
+                        }
+                    }
                 }
             }
         },
         rotate: {
             entry: "rotatePiece",
             always: "play"
+        },
+        select: {
+            entry: "selectPiece",
+            always: "play.degree"
         },
         shuffle: {
             entry: "shufflePieces",
