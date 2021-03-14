@@ -42,6 +42,8 @@ export const grammar = `
    <one-of>
       <item>left</item>
       <item>right</item>
+      <item>clockwise<tag>out="right";</tag></item>
+      <item>counterclockwise<tag>out="left";</tag></item>
    </one-of>
 </rule>
 </grammar>

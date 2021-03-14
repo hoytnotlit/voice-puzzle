@@ -4,7 +4,8 @@ import * as ReactDOM from "react-dom";
 import { Machine, assign, actions, State } from "xstate";
 import { useMachine, asEffect } from "@xstate/react";
 import { inspect } from "@xstate/inspect";
-import { dmMachine } from "./dmPuzzle";
+import { dmMachine as dmMachinePuzzle } from "./dmPuzzle";
+import { dmMachine as dmMachineSettings } from "./dmSettings";
 const { send, cancel } = actions;
 
 inspect({
@@ -20,7 +21,10 @@ const machine = Machine<SDSContext, any, SDSEvent>(
         type: "parallel",
         states: {
             dm: {
-                ...dmMachine,
+                ...dmMachinePuzzle,
+            },
+            settings: {
+                ...dmMachineSettings,
             },
             asrtts: {
                 initial: "idle",
@@ -58,7 +62,7 @@ const machine = Machine<SDSContext, any, SDSEvent>(
                                 ],
                                 target: "idle",
                             },
-                            MAXSPEECH: "idle",
+                            MAXSPEECH: "idle"
                         },
                         states: {
                             progress: {},
@@ -80,14 +84,12 @@ const machine = Machine<SDSContext, any, SDSEvent>(
     {
         actions: {
             recLogResult: (context: SDSContext) => {
-                /* context.recResult = event.recResult; */
                 console.log("<< ASR: " + context.recResult);
             },
             test: () => {
                 console.log("test");
             },
             logIntent: (context: SDSContext) => {
-                /* context.nluData = event.data */
                 console.log("<< NLU intent: " + context.nluData.intent.name);
             },
         },
@@ -131,6 +133,9 @@ const ReactiveButton = (props: Props): JSX.Element => {
     }
 };
 
+let zeroDegreesCount = 0
+const piecesCount = 9
+
 function App() {
     const { speak, cancel, speaking } = useSpeechSynthesis({
         onEnd: () => {
@@ -169,20 +174,23 @@ function App() {
                 const piece = document.getElementById(pieceId);
 
                 if (piece) {
-                    // TODO implement direction
-                    
+                    // TODO implement hard mode (how?)
+
                     // add or subtract degree and current degree
                     let currDegree = piece.style.transform.match(/\d+/)[0];
-                    let degree = parseInt(currDegree) + parseInt(context.degree);
+                    let degree = getDegree(parseInt(currDegree), parseInt(context.degree),
+                        context.direction);
+                    piece.style.transform = `rotate(${degree}deg)`; // set degree as rotate value
+                    piece.classList.remove("selected"); // remove selected class
 
-                    // don't exceed 360deg
-                    if (degree === 360) degree = 0;
+                    // TODO jos oikein -> myöhemmin väärin, poista counterista
+                    if (degree === 0) zeroDegreesCount++
 
-                    if (degree > 360)
-                        degree = parseInt(currDegree) - parseInt(context.degree);
-                    piece.style.transform = `rotate(${degree}deg)`;
-                    // remove selected class
-                    piece.classList.remove("selected");
+                    // TODO is there a better way to handle winning other than sending two events?
+                    if (zeroDegreesCount === piecesCount)
+                        send("WIN");
+                    else
+                        send("CONTINUE");
                 }
             }),
             shufflePieces: asEffect((context) => {
@@ -195,13 +203,15 @@ function App() {
                     const degrees = [0, 90, 180, 270];
 
                     for (let i = 0; i < pieces.length; i++) {
-                        let randomDegree =
-                            degrees[Math.floor(Math.random() * degrees.length)];
                         const htmlElement = document.getElementById(pieces[i].id);
 
                         // typescript forcing strict null checks
-                        if (htmlElement)
+                        if (htmlElement) {
+                            let randomDegree = degrees[Math.floor(Math.random() * degrees.length)];
                             htmlElement.style.transform = `rotate(${randomDegree}deg)`;
+
+                            if (randomDegree === 0) zeroDegreesCount++;
+                        }
                     }
                 }
             }),
@@ -234,7 +244,11 @@ function App() {
 
     return (
         <div className="App">
+            <button type="button" onClick={() => send("SETTINGS")}>Settings</button>
             <ReactiveButton state={current} onClick={() => send("CLICK")} />
+
+            {renderSettings(current.value)}
+
             <div className="board" id="board">
                 <div className="top-left" id="top-left"></div>
                 <div className="top-center" id="top-center"></div>
@@ -248,6 +262,35 @@ function App() {
             </div>
         </div>
     );
+}
+
+function renderSettings(currentValue: any) {
+    return (
+        currentValue.settings !== "init" ?
+            <div>Settings: Change image Change mode</div> : null
+    );
+}
+
+function getDegree(currDegree: number, degreeToRotate: number, direction: string): number {
+    let degree = 0;
+
+    // rotate to correct direction
+    if (direction === "right") {
+        degree = currDegree + degreeToRotate;
+
+        if (degree > 360)
+            degree = currDegree - degreeToRotate;
+    } else {
+        degree = currDegree - degreeToRotate;
+
+        if (degree < 0)
+            degree = currDegree + degreeToRotate;
+    }
+
+    // don't exceed 360deg
+    if (degree === 360) degree = 0;
+
+    return degree;
 }
 
 const rootElement = document.getElementById("root");

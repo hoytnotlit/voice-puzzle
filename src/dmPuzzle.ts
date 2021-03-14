@@ -15,8 +15,19 @@ function getGrammarResult(recResult: string) {
         res.resultsForRule(gram.$root)[0].puzzleMove : {};
 }
 
-function ask(prompt: string) {
-    // TODO
+function ask(prompt: string): any {
+    return {
+        prompt: {
+            on: { ENDSPEECH: "listen" },
+            entry: send((context) => ({
+                type: "SPEAK",
+                value: prompt
+            })),
+        },
+        listen: {
+            entry: send('LISTEN')
+        }
+    }
 }
 
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
@@ -78,7 +89,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                         RECOGNISED: [
                             {
                                 target: '#play.direction',
-                                // target: '#root.dm.rotate',
                                 cond: (context) => getGrammarResult(context.recResult).degree,
                                 actions: assign((context) => { return { degree: getGrammarResult(context.recResult).degree } }),
                             },
@@ -125,9 +135,20 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 }
             }
         },
+        win: {
+            on: { ENDSPEECH: "init" },
+            entry: send((context) => ({
+                type: "SPEAK",
+                value: "You win! Congrats!"
+            })),
+        },
         rotate: {
+            on: {
+                WIN: "win",
+                CONTINUE: "play",
+            },
             entry: "rotatePiece",
-            always: "play"
+            // always: "play"
         },
         select: {
             entry: "selectPiece",
