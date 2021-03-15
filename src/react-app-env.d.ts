@@ -10,7 +10,7 @@ interface SDSContext {
     degree: string;
     direction: string;
     mode: string;
-    solved: boolean;
+    moves: number;
 }
 
 // TODO can event have id eg click event for both settings and start buttons?
@@ -19,6 +19,7 @@ type SDSEvent =
     | { type: 'SETTINGS' }
     | { type: 'WIN' }
     | { type: 'CONTINUE' }
+    | { type: 'LOSE' }
     | { type: 'RECOGNISED' }
     | { type: 'DONE' }
     | { type: 'MAXSPEECH' }

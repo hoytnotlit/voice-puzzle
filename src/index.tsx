@@ -133,7 +133,7 @@ const ReactiveButton = (props: Props): JSX.Element => {
     }
 };
 
-let zeroDegreesCount = 0
+let finishedPiecesCount = 0
 const piecesCount = 9
 
 function App() {
@@ -174,20 +174,23 @@ function App() {
                 const piece = document.getElementById(pieceId);
 
                 if (piece) {
-                    // TODO implement hard mode (how?)
-
-                    // add or subtract degree and current degree
+                    // get the new degree
                     let currDegree = piece.style.transform.match(/\d+/)[0];
                     let degree = getDegree(parseInt(currDegree), parseInt(context.degree),
                         context.direction);
                     piece.style.transform = `rotate(${degree}deg)`; // set degree as rotate value
                     piece.classList.remove("selected"); // remove selected class
 
-                    // TODO jos oikein -> myöhemmin väärin, poista counterista
-                    if (degree === 0) zeroDegreesCount++
+                    // track pieces that are turned the right way (at 0 degrees)
+                    if (parseInt(currDegree) === 0 && degree !== 0) finishedPiecesCount--;
+                    if (degree === 0) finishedPiecesCount++;
 
+                    // in hard mode allow user to try only as many times as there are pieces
                     // TODO is there a better way to handle winning other than sending two events?
-                    if (zeroDegreesCount === piecesCount)
+                    // trigger win or continue event based on count of "finished" pieces 
+                    if (context.mode === "hard" && context.moves === piecesCount)
+                        send("LOSE");
+                    else if (finishedPiecesCount === piecesCount)
                         send("WIN");
                     else
                         send("CONTINUE");
@@ -202,6 +205,13 @@ function App() {
                     // TODO include 0 here or not?
                     const degrees = [0, 90, 180, 270];
 
+                    // TODO make demo settings that can be toggled on/off
+                    // some values to use for demoing so solving won't take forever
+                    // const demoValue = 2; 
+                    // finishedPieces = piecesCount - demoValue;
+
+                    // use real value 
+
                     for (let i = 0; i < pieces.length; i++) {
                         const htmlElement = document.getElementById(pieces[i].id);
 
@@ -210,7 +220,7 @@ function App() {
                             let randomDegree = degrees[Math.floor(Math.random() * degrees.length)];
                             htmlElement.style.transform = `rotate(${randomDegree}deg)`;
 
-                            if (randomDegree === 0) zeroDegreesCount++;
+                            if (randomDegree === 0) finishedPiecesCount++;
                         }
                     }
                 }
@@ -248,22 +258,28 @@ function App() {
             <ReactiveButton state={current} onClick={() => send("CLICK")} />
 
             {renderSettings(current.value)}
+            {renderBoard()}
 
-            <div className="board" id="board">
-                <div className="top-left" id="top-left"></div>
-                <div className="top-center" id="top-center"></div>
-                <div className="top-right" id="top-right"></div>
-                <div className="middle-left" id="middle-left"></div>
-                <div className="middle-center" id="middle-center"></div>
-                <div className="middle-right" id="middle-right"></div>
-                <div className="bottom-left" id="bottom-left"></div>
-                <div className="bottom-center" id="bottom-center"></div>
-                <div className="bottom-right" id="bottom-right"></div>
-            </div>
         </div>
     );
 }
 
+// get the puzzle piece board
+function renderBoard() {
+    return (<div className="board" id="board">
+        <div className="top-left" id="top-left"></div>
+        <div className="top-center" id="top-center"></div>
+        <div className="top-right" id="top-right"></div>
+        <div className="middle-left" id="middle-left"></div>
+        <div className="middle-center" id="middle-center"></div>
+        <div className="middle-right" id="middle-right"></div>
+        <div className="bottom-left" id="bottom-left"></div>
+        <div className="bottom-center" id="bottom-center"></div>
+        <div className="bottom-right" id="bottom-right"></div>
+    </div>);
+}
+
+// get a visual of settings
 function renderSettings(currentValue: any) {
     return (
         currentValue.settings !== "init" ?
@@ -274,17 +290,17 @@ function renderSettings(currentValue: any) {
 function getDegree(currDegree: number, degreeToRotate: number, direction: string): number {
     let degree = 0;
 
-    // rotate to correct direction
-    if (direction === "right") {
-        degree = currDegree + degreeToRotate;
-
-        if (degree > 360)
-            degree = currDegree - degreeToRotate;
-    } else {
+    // add or subtract degree and current degree, rotate to correct direction (default is right)
+    if (direction == "left") {
         degree = currDegree - degreeToRotate;
 
         if (degree < 0)
             degree = currDegree + degreeToRotate;
+    } else {
+        degree = currDegree + degreeToRotate;
+
+        if (degree > 360)
+            degree = currDegree - degreeToRotate;
     }
 
     // don't exceed 360deg

@@ -1,11 +1,12 @@
 import { MachineConfig, send, Action, assign } from "xstate";
 
 // use srgs grammar - TODO or maybe rasa would be handier?
-import { loadGrammar } from './runparser'
-import { parse } from './chartparser'
-import { grammar } from './grammars/puzzleGrammar'
+import { loadGrammar } from './runparser';
+import { parse } from './chartparser';
+import { grammar } from './grammars/puzzleGrammar';
 
-const gram = loadGrammar(grammar)
+const gram = loadGrammar(grammar);
+const commands = ["help", "reset"];
 
 function getGrammarResult(recResult: string) {
     let res = parse(recResult.toLowerCase().split(/\s+/), gram);
@@ -13,6 +14,10 @@ function getGrammarResult(recResult: string) {
     // return empty object if grammar result is not found
     return res.resultsForRule(gram.$root)[0] ?
         res.resultsForRule(gram.$root)[0].puzzleMove : {};
+}
+
+function say(text: string): Action<SDSContext, SDSEvent> {
+    return send((_context: SDSContext) => ({ type: "SPEAK", value: text }))
 }
 
 function ask(prompt: string): any {
@@ -40,15 +45,36 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
         },
         welcome: {
             on: { ENDSPEECH: "shuffle" },
-            entry: send((context) => ({
-                type: "SPEAK",
-                value: "Welcome here"
-            })),
+            entry: say("Let's begin by shuffling the pieces.")
+        },
+        // just an extra state to add a bit more natural dialog
+        afterShuffle: {
+            on: { ENDSPEECH: "play" },
+            entry: say("Now...")
         },
         play: {
+            on: {
+                RECOGNISED: [{
+                    cond: (context) => context.recResult === "help",
+                    target: "#root.dm.help"
+                },
+                {
+                    cond: (context) => context.recResult === "reset",
+                    target: "#root.dm.reset"
+                },
+                ]
+            },
             id: "play",
             initial: "piece",
             states: {
+                hist: {
+                    type: 'history',
+                    history: 'shallow' // TODO deep is better maybe?
+                },
+                // TODO redirect user to correct substate based on how much information they give
+                redirect: {
+
+                },
                 piece: {
                     initial: "prompt",
                     on: {
@@ -63,11 +89,13 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             },
                             {
                                 target: "#root.dm.select",
-                                // target: '#play.degree',
                                 cond: (context) => getGrammarResult(context.recResult) && getGrammarResult(context.recResult).piece,
                                 actions: assign((context) => { return { piece: getGrammarResult(context.recResult).piece } }),
                             },
-                            { target: ".prompt" }
+                            {
+                                target: ".prompt",
+                                cond: (context) => commands.indexOf(context.recResult) < 0,
+                            }
                         ]
                     },
                     states: {
@@ -92,7 +120,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                                 cond: (context) => getGrammarResult(context.recResult).degree,
                                 actions: assign((context) => { return { degree: getGrammarResult(context.recResult).degree } }),
                             },
-                            { target: ".prompt" }
+                            {
+                                target: ".prompt",
+                                cond: (context) => commands.indexOf(context.recResult) < 0,
+                            }
                         ]
                     },
                     states: {
@@ -117,7 +148,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                                 cond: (context) => getGrammarResult(context.recResult).direction,
                                 actions: assign((context) => { return { direction: getGrammarResult(context.recResult).direction } }),
                             },
-                            { target: ".prompt" }
+                            {
+                                target: ".prompt",
+                                cond: (context) => commands.indexOf(context.recResult) < 0,
+                            }
                         ]
                     },
                     states: {
@@ -135,17 +169,47 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 }
             }
         },
-        win: {
-            on: { ENDSPEECH: "init" },
+        help: {
+            on: { ENDSPEECH: "#root.dm.play.hist" },
             entry: send((context) => ({
                 type: "SPEAK",
-                value: "You win! Congrats!"
+                value: "Help is here!" // TODO specify help messages
             })),
+        },
+        win: {
+            on: { ENDSPEECH: "init" },
+            entry: say("You win! Congrats!")
+        },
+        lose: {
+            initial: "prompt",
+            on: {
+                RECOGNISED: [{
+                    target: 'init',
+                    cond: (context) => context.recResult === "no"
+                },
+                {
+                    target: 'welcome',
+                    cond: (context) => context.recResult === "yes"
+                }]
+            },
+            states: {
+                ...ask("You lose! Sorry! Do you want to try again?")
+            }
         },
         rotate: {
             on: {
-                WIN: "win",
-                CONTINUE: "play",
+                WIN: {
+                    target: "win",
+                    actions: assign((context) => { return { moves: undefined } }),
+                },
+                CONTINUE: {
+                    target: "play",
+                    actions: assign((context) => { return { moves: context.moves ? context.moves++ : 1 } }),
+                },
+                LOSE: {
+                    target: "lose",
+                    actions: assign((context) => { return { moves: undefined } }),
+                }
             },
             entry: "rotatePiece",
             // always: "play"
@@ -156,7 +220,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
         },
         shuffle: {
             entry: "shufflePieces",
-            always: "play"
+            always: "afterShuffle"
         },
         reset: {
             entry: "resetBoard",
