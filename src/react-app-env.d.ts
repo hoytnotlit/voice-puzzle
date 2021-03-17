@@ -7,7 +7,7 @@ interface SDSContext {
     nluData: any;
     ttsAgenda: string;
     piece: string;
-    degree: string;
+    degree: number;
     direction: string;
     mode: string;
     moves: number;

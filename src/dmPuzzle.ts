@@ -11,7 +11,6 @@ const commands = ["help", "reset"];
 function getGrammarResult(recResult: string) {
     let res = parse(recResult.toLowerCase().split(/\s+/), gram);
 
-    console.log(res.resultsForRule(gram.$root)[0])
     // return undefined if grammar result is not found
     return res.resultsForRule(gram.$root)[0] ?
         res.resultsForRule(gram.$root)[0].puzzleMove : undefined;
@@ -52,7 +51,7 @@ function getDefaultEvents(help_msg: string): any {
         },
         {
             cond: (context: SDSContext) => context.recResult === "help",
-            actions: assign((context: SDSContext) => { return { help_msg: help_msg} }),
+            actions: assign((context: SDSContext) => { return { help_msg: help_msg } }),
             target: "#root.dm.help"
         },
         {
@@ -103,6 +102,11 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                                 && context.direction !== undefined
                         },
                         // TODO if degree is twice/180, dont bother asking for direction
+                        {
+                            target: '#root.dm.rotate',
+                            cond: (context) => context.piece !== undefined
+                                && context.degree === 180
+                        },
                         {
                             target: '#play.direction',
                             cond: (context) => context.piece !== undefined
@@ -164,7 +168,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
             initial: "prompt",
             on: {
                 RECOGNISED: [{
-                    target: 'init',
+                    target: 'reset',
                     cond: (context) => context.recResult === "no"
                 },
                 {
@@ -173,14 +177,21 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 }]
             },
             states: {
-                ...getDefaultStates("You lose! Sorry! Do you want to try again?")
+                ...getDefaultStates("You used up all your turns! Do you want to start over?")
             }
         },
         rotate: {
             on: {
                 WIN: {
                     target: "win",
-                    actions: assign((context) => { return { moves: undefined } }),
+                    actions: assign((context) => {
+                        return {
+                            piece: undefined,
+                            degree: undefined,
+                            direction: undefined,
+                            moves: undefined
+                        }
+                    }),
                 },
                 CONTINUE: {
                     target: "play",
@@ -190,13 +201,20 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             piece: undefined,
                             degree: undefined,
                             direction: undefined,
-                            moves: context.moves ? context.moves++ : 1
+                            moves: context.moves ? context.moves+1 : 1
                         }
                     }),
                 },
                 LOSE: {
                     target: "lose",
-                    actions: assign((context) => { return { moves: undefined } }),
+                    actions: assign((context) => {
+                        return {
+                            piece: undefined,
+                            degree: undefined,
+                            direction: undefined,
+                            moves: undefined
+                        }
+                    }),
                 }
             },
             entry: "rotatePiece",

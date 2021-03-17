@@ -23,6 +23,66 @@ body {
   }
 }
 
+.settings-btn {
+  padding: 10px;
+  border-radius: 0;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-left: auto;
+  display: block;
+}
+
+.column-names {
+  color: wheat;
+  flex-direction: row;
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  top: 15%;
+  font-size: 1vmin;
+  width: 60em;
+
+  div {
+    width: 20em;
+
+    span {
+      font-size: 2em;
+    }
+  }
+}
+
+.row-names {
+  color: wheat;
+  flex-direction: column;
+  display: flex;
+  // width: 130px;
+  // margin-left: 7%;
+  position: absolute;
+  font-size: 1vmin;
+  height: 60em;
+  left: 7%;
+  top: 20em;
+  
+  div {
+    height: 20em;
+    width: 20em;
+    text-align: right;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    span {
+      font-size: 2em;
+    }
+  }
+}
+
+.hidden {
+  visibility: hidden;
+}
+
 .board {
   font-size: 1vmin;
   width: 60em;

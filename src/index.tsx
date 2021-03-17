@@ -228,6 +228,7 @@ function App() {
             resetBoard: asEffect((context) => {
                 const board = document.getElementById("board");
                 if (board) {
+                    board.classList.remove("playing");
                     const pieces = board.children;
 
                     for (let i = 0; i < pieces.length; i++) {
@@ -255,11 +256,16 @@ function App() {
     return (
         <div className="App">
             {/* <input type="checkbox">Demo mode</input> */}
-            <button type="button" onClick={() => send("SETTINGS")}>Settings</button>
+            <button type="button" className="settings-btn" onClick={() => send("SETTINGS")}>Settings</button>
             <ReactiveButton state={current} onClick={() => send("CLICK")} />
 
             {renderSettings(current.value)}
             {renderBoard()}
+
+            <div>
+                Say help at any point for a help message.
+                Want to stop playing? Say reset and the pieces will be organized for you.
+            </div>
 
         </div>
     );
@@ -267,17 +273,23 @@ function App() {
 
 // get the puzzle piece board
 function renderBoard() {
-    return (<div className="board" id="board">
-        <div className="top-left" id="top-left"></div>
-        <div className="top-center" id="top-center"></div>
-        <div className="top-right" id="top-right"></div>
-        <div className="middle-left" id="middle-left"></div>
-        <div className="middle-center" id="middle-center"></div>
-        <div className="middle-right" id="middle-right"></div>
-        <div className="bottom-left" id="bottom-left"></div>
-        <div className="bottom-center" id="bottom-center"></div>
-        <div className="bottom-right" id="bottom-right"></div>
-    </div>);
+    return (
+        <div>
+            <div className="column-names"><div><span>left</span></div><div><span>center</span></div><div><span>right</span></div></div>
+            <div className="row-names"><div><span>top</span></div><div><span>middle</span></div><div><span>bottom</span></div></div>
+            <div className="board" id="board">
+                <div className="top-left" id="top-left"></div>
+                <div className="top-center" id="top-center"></div>
+                <div className="top-right" id="top-right"></div>
+                <div className="middle-left" id="middle-left"></div>
+                <div className="middle-center" id="middle-center"></div>
+                <div className="middle-right" id="middle-right"></div>
+                <div className="bottom-left" id="bottom-left"></div>
+                <div className="bottom-center" id="bottom-center"></div>
+                <div className="bottom-right" id="bottom-right"></div>
+            </div>
+        </div>
+    );
 }
 
 // get a visual of settings
