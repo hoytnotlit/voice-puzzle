@@ -12,6 +12,7 @@ interface SDSContext {
     mode: string;
     moves: number;
     help_msg: string;
+    image: string;
 }
 
 // TODO can event have id eg click event for both settings and start buttons?

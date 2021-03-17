@@ -250,6 +250,20 @@ function App() {
                     piece.classList.add("selected");
                 }
             }),
+            changeImage: asEffect((context) => {
+                const board = document.getElementById("board");
+                if (board) {
+                    board.classList.remove("playing");
+                    const pieces = board.children;
+
+                    for (let i = 0; i < pieces.length; i++) {
+                        const htmlElement = document.getElementById(pieces[i].id);
+
+                        // typescript forcing strict null checks
+                        if (htmlElement) htmlElement.style.backgroundImage = `url(${context.image})`;
+                    }
+                }
+            })
         },
     });
 
