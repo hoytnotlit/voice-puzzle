@@ -1,4 +1,4 @@
-import { MachineConfig, send, Action, assign } from "xstate";
+import { MachineConfig, send, Action, assign, TransitionConfigOrTarget } from "xstate";
 
 // use srgs grammar - TODO or maybe rasa would be handier?
 import { loadGrammar } from './runparser';
@@ -11,16 +11,17 @@ const commands = ["help", "reset"];
 function getGrammarResult(recResult: string) {
     let res = parse(recResult.toLowerCase().split(/\s+/), gram);
 
-    // return empty object if grammar result is not found
+    console.log(res.resultsForRule(gram.$root)[0])
+    // return undefined if grammar result is not found
     return res.resultsForRule(gram.$root)[0] ?
-        res.resultsForRule(gram.$root)[0].puzzleMove : {};
+        res.resultsForRule(gram.$root)[0].puzzleMove : undefined;
 }
 
 function say(text: string): Action<SDSContext, SDSEvent> {
     return send((_context: SDSContext) => ({ type: "SPEAK", value: text }))
 }
 
-function ask(prompt: string): any {
+function getDefaultStates(prompt: string): any {
     return {
         prompt: {
             on: { ENDSPEECH: "listen" },
@@ -33,6 +34,32 @@ function ask(prompt: string): any {
             entry: send('LISTEN')
         }
     }
+}
+
+// TODO what is the type really?
+function getDefaultEvents(help_msg: string): any {
+    return [
+        {
+            target: "redirect",
+            cond: (context: SDSContext) => getGrammarResult(context.recResult),
+            actions: assign((context: SDSContext) => {
+                return {
+                    piece: context.piece ? context.piece : getGrammarResult(context.recResult).piece,
+                    degree: context.degree ? context.degree : getGrammarResult(context.recResult).degree,
+                    direction: context.direction ? context.direction : getGrammarResult(context.recResult).direction,
+                }
+            }),
+        },
+        {
+            cond: (context: SDSContext) => context.recResult === "help",
+            actions: assign((context: SDSContext) => { return { help_msg: help_msg} }),
+            target: "#root.dm.help"
+        },
+        {
+            target: ".prompt",
+            cond: (context: SDSContext) => commands.indexOf(context.recResult) < 0,
+        }
+    ]
 }
 
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
@@ -54,117 +81,70 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
         },
         play: {
             on: {
-                RECOGNISED: [{
-                    cond: (context) => context.recResult === "help",
-                    target: "#root.dm.help"
-                },
-                {
+                RECOGNISED: {
                     cond: (context) => context.recResult === "reset",
                     target: "#root.dm.reset"
-                },
-                ]
+                }
             },
             id: "play",
             initial: "piece",
             states: {
                 hist: {
                     type: 'history',
-                    history: 'shallow' // TODO deep is better maybe?
+                    history: 'shallow'
                 },
-                // TODO redirect user to correct substate based on how much information they give
+                // redirect user to correct substate based on how much information they give
                 redirect: {
-
+                    always: [
+                        {
+                            target: '#root.dm.rotate',
+                            cond: (context) => context.piece !== undefined
+                                && context.degree !== undefined
+                                && context.direction !== undefined
+                        },
+                        // TODO if degree is twice/180, dont bother asking for direction
+                        {
+                            target: '#play.direction',
+                            cond: (context) => context.piece !== undefined
+                                && context.degree !== undefined
+                        },
+                        {
+                            target: '#root.dm.select',
+                            cond: (context) => context.piece !== undefined,
+                        }
+                    ]
                 },
                 piece: {
                     initial: "prompt",
                     on: {
                         RECOGNISED: [
-                            {
-                                target: '#root.dm.rotate',
-                                cond: (context) => getGrammarResult(context.recResult).piece && getGrammarResult(context.recResult).degree,
-                                actions: assign((context) => {
-                                    let grmRes = getGrammarResult(context.recResult);
-                                    return { piece: grmRes.piece, degree: grmRes.degree }
-                                }),
-                            },
-                            {
-                                target: "#root.dm.select",
-                                cond: (context) => getGrammarResult(context.recResult) && getGrammarResult(context.recResult).piece,
-                                actions: assign((context) => { return { piece: getGrammarResult(context.recResult).piece } }),
-                            },
-                            {
-                                target: ".prompt",
-                                cond: (context) => commands.indexOf(context.recResult) < 0,
-                            }
+                            ...getDefaultEvents("First tell me the row name and then the column name.")
                         ]
                     },
                     states: {
-                        prompt: {
-                            on: { ENDSPEECH: "listen" },
-                            entry: send((context) => ({
-                                type: "SPEAK",
-                                value: "Which piece would you like to rotate?"
-                            })),
-                        },
-                        listen: {
-                            entry: send('LISTEN')
-                        }
+                        ...getDefaultStates("Which piece would you like to rotate?")
                     }
                 },
                 degree: {
                     initial: "prompt",
                     on: {
                         RECOGNISED: [
-                            {
-                                target: '#play.direction',
-                                cond: (context) => getGrammarResult(context.recResult).degree,
-                                actions: assign((context) => { return { degree: getGrammarResult(context.recResult).degree } }),
-                            },
-                            {
-                                target: ".prompt",
-                                cond: (context) => commands.indexOf(context.recResult) < 0,
-                            }
+                            ...getDefaultEvents("Tell me either a degree or a number of times to rotate.")
                         ]
                     },
                     states: {
-                        prompt: {
-                            on: { ENDSPEECH: "listen" },
-                            entry: send((context) => ({
-                                type: "SPEAK",
-                                value: "How much do you want to rotate it?"
-                            })),
-                        },
-                        listen: {
-                            entry: send('LISTEN')
-                        }
+                        ...getDefaultStates("How much do you want to rotate it?")
                     }
                 },
                 direction: {
                     initial: "prompt",
                     on: {
                         RECOGNISED: [
-                            {
-                                target: '#root.dm.rotate',
-                                cond: (context) => getGrammarResult(context.recResult).direction,
-                                actions: assign((context) => { return { direction: getGrammarResult(context.recResult).direction } }),
-                            },
-                            {
-                                target: ".prompt",
-                                cond: (context) => commands.indexOf(context.recResult) < 0,
-                            }
+                            ...getDefaultEvents("I can go either clockwise or counter clockwise.")
                         ]
                     },
                     states: {
-                        prompt: {
-                            on: { ENDSPEECH: "listen" },
-                            entry: send((context) => ({
-                                type: "SPEAK",
-                                value: "In which direction should I rotate it?"
-                            })),
-                        },
-                        listen: {
-                            entry: send('LISTEN')
-                        }
+                        ...getDefaultStates("In which direction should I rotate it?")
                     }
                 }
             }
@@ -173,7 +153,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
             on: { ENDSPEECH: "#root.dm.play.hist" },
             entry: send((context) => ({
                 type: "SPEAK",
-                value: "Help is here!" // TODO specify help messages
+                value: `${context.help_msg}`
             })),
         },
         win: {
@@ -193,7 +173,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 }]
             },
             states: {
-                ...ask("You lose! Sorry! Do you want to try again?")
+                ...getDefaultStates("You lose! Sorry! Do you want to try again?")
             }
         },
         rotate: {
@@ -204,7 +184,15 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 },
                 CONTINUE: {
                     target: "play",
-                    actions: assign((context) => { return { moves: context.moves ? context.moves++ : 1 } }),
+                    actions: assign((context) => {
+                        // reset moves after each turn
+                        return {
+                            piece: undefined,
+                            degree: undefined,
+                            direction: undefined,
+                            moves: context.moves ? context.moves++ : 1
+                        }
+                    }),
                 },
                 LOSE: {
                     target: "lose",
@@ -212,7 +200,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 }
             },
             entry: "rotatePiece",
-            // always: "play"
         },
         select: {
             entry: "selectPiece",

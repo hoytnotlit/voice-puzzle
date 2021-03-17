@@ -254,6 +254,7 @@ function App() {
 
     return (
         <div className="App">
+            {/* <input type="checkbox">Demo mode</input> */}
             <button type="button" onClick={() => send("SETTINGS")}>Settings</button>
             <ReactiveButton state={current} onClick={() => send("CLICK")} />
 
