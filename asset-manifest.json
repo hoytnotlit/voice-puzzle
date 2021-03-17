@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/voice-puzzle/static/css/main.59c0919d.chunk.css",
+    "main.js": "/voice-puzzle/static/js/main.f77af3e1.chunk.js",
+    "main.js.map": "/voice-puzzle/static/js/main.f77af3e1.chunk.js.map",
+    "runtime-main.js": "/voice-puzzle/static/js/runtime-main.41f73b28.js",
+    "runtime-main.js.map": "/voice-puzzle/static/js/runtime-main.41f73b28.js.map",
+    "static/js/2.01f73b7a.chunk.js": "/voice-puzzle/static/js/2.01f73b7a.chunk.js",
+    "static/js/2.01f73b7a.chunk.js.map": "/voice-puzzle/static/js/2.01f73b7a.chunk.js.map",
+    "index.html": "/voice-puzzle/index.html",
+    "static/css/main.59c0919d.chunk.css.map": "/voice-puzzle/static/css/main.59c0919d.chunk.css.map",
+    "static/js/2.01f73b7a.chunk.js.LICENSE.txt": "/voice-puzzle/static/js/2.01f73b7a.chunk.js.LICENSE.txt",
+    "static/media/styles.scss": "/voice-puzzle/static/media/default-img.75638ffd.jpg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.41f73b28.js",
+    "static/js/2.01f73b7a.chunk.js",
+    "static/css/main.59c0919d.chunk.css",
+    "static/js/main.f77af3e1.chunk.js"
+  ]
+}
