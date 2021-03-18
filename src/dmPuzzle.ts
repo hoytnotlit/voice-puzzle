@@ -101,12 +101,13 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                                 && context.degree !== undefined
                                 && context.direction !== undefined
                         },
-                        // TODO if degree is twice/180, dont bother asking for direction
+                        // if degree is twice/180, dont bother asking for direction
                         {
                             target: '#root.dm.rotate',
                             cond: (context) => context.piece !== undefined
                                 && context.degree === 180
                         },
+                        // TODO select piece in case like "top left 90 degrees"
                         {
                             target: '#play.direction',
                             cond: (context) => context.piece !== undefined

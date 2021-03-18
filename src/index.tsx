@@ -198,8 +198,12 @@ function App() {
             }),
             shufflePieces: asEffect((context) => {
                 const board = document.getElementById("board");
+                const labels = document.getElementById("labels");
+                const info = document.getElementById("info");
                 if (board) {
                     board.classList.add("playing");
+                    labels.classList.remove("hidden");
+                    info.classList.remove("hidden");
 
                     const pieces = board.children;
                     // TODO include 0 here or not?
@@ -227,8 +231,14 @@ function App() {
             }),
             resetBoard: asEffect((context) => {
                 const board = document.getElementById("board");
+                const labels = document.getElementById("labels");
+                const info = document.getElementById("info");
                 if (board) {
+                    // reset classes to hide things
                     board.classList.remove("playing");
+                    labels.classList.add("hidden");
+                    info.classList.add("hidden");
+
                     const pieces = board.children;
 
                     for (let i = 0; i < pieces.length; i++) {
@@ -270,15 +280,19 @@ function App() {
     return (
         <div className="App">
             {/* <input type="checkbox">Demo mode</input> */}
-            <button type="button" className="settings-btn" onClick={() => send("SETTINGS")}>Settings</button>
-            <ReactiveButton state={current} onClick={() => send("CLICK")} />
+            <div className="btn-wrapper">
+                <ReactiveButton state={current} onClick={() => send("CLICK")} />
+                <button type="button" className="settings-btn" onClick={() => send("SETTINGS")}>Settings</button>
+            </div>
 
             {renderSettings(current.value)}
             {renderBoard()}
 
-            <div>
-                Say help at any point for a help message.
-                Want to stop playing? Say reset and the pieces will be organized for you.
+            <div className="info hidden" id="info">
+                <span>
+                    Say <b>help</b> at any point for a help message.
+                    Want to stop playing? Say <b>reset</b> and the pieces will be organized for you.
+                </span>
             </div>
 
         </div>
@@ -289,8 +303,11 @@ function App() {
 function renderBoard() {
     return (
         <div>
-            <div className="column-names"><div><span>left</span></div><div><span>center</span></div><div><span>right</span></div></div>
-            <div className="row-names"><div><span>top</span></div><div><span>middle</span></div><div><span>bottom</span></div></div>
+            <div className="hidden" id="labels">
+                <div className="column-names"><div><span>left</span></div><div><span>center</span></div><div><span>right</span></div></div>
+                <div className="row-names"><div><span>top</span></div><div><span>middle</span></div><div><span>bottom</span></div></div>
+            </div>
+
             <div className="board" id="board">
                 <div className="top-left" id="top-left"></div>
                 <div className="top-center" id="top-center"></div>
@@ -310,7 +327,12 @@ function renderBoard() {
 function renderSettings(currentValue: any) {
     return (
         currentValue.settings !== "init" ?
-            <div>Settings: Change image Change mode</div> : null
+            <div className="settings">Settings:
+                <ul>
+                    <li>Change mode</li>
+                    <li>Change image</li>
+                    <li>Exit</li>
+                </ul></div> : null
     );
 }
 

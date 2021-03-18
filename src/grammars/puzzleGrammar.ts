@@ -37,6 +37,9 @@ export const grammar = `<grammar root="puzzleMove">
          </one-of>
          <item repeat="0-1">degrees</item>
       </item>
+      <item>90°<tag>out=90;</tag></item>
+      <item>180°<tag>out=90;</tag></item>
+      <item>270°<tag>out=90;</tag></item>
       <item>once <tag>out=90;</tag></item>
       <item>one time <tag>out=90;</tag></item>
       <item>twice <tag>out=180;</tag></item>

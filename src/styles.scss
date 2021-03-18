@@ -2,6 +2,7 @@ body {
   margin: 0;
   background: #222;
   text-align: center;
+  color: #b7aaaa;
 }
 
 .start-btn {
@@ -32,6 +33,20 @@ body {
   display: block;
 }
 
+.settings {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #222;
+  opacity: 0.95;
+  z-index: 1;
+  width: 250px;
+  margin: 0 auto;
+  border-radius: 3px;
+  padding: 10px;
+  text-align: left;
+}
+
 .column-names {
   color: wheat;
   flex-direction: row;
@@ -57,12 +72,10 @@ body {
   color: wheat;
   flex-direction: column;
   display: flex;
-  // width: 130px;
-  // margin-left: 7%;
   position: absolute;
   font-size: 1vmin;
   height: 60em;
-  left: 7%;
+  left: calc(50% - 55em);
   top: 20em;
 
   div {
@@ -79,8 +92,10 @@ body {
   }
 }
 
-.hidden {
-  visibility: hidden;
+.info {
+  padding: 10px;
+  width: 50%;
+  margin: 0 auto;
 }
 
 .board {
@@ -133,6 +148,15 @@ body {
       // -webkit-filter: blur(8px);
     }
   }
+}
+
+.hidden {
+  display: none;
+}
+
+.btn-wrapper {
+  display: flex;
+  align-items: center;
 }
 
 .top-left {

@@ -1,5 +1,15 @@
-import { MachineConfig, send, Action, assign } from "xstate";
-import { init } from "xstate/lib/actionTypes";
+import { MachineConfig, send, assign } from "xstate";
+
+import { loadGrammar } from './runparser';
+import { parse } from './chartparser';
+import { grammar } from './grammars/settingsGrammar';
+
+const gram = loadGrammar(grammar);
+
+function getGrammarResult(recResult: string) {
+    let res = parse(recResult.toLowerCase().split(/\s+/), gram);
+    return res.resultsForRule(gram.$root)[0] ? res.resultsForRule(gram.$root)[0].setting : undefined;
+}
 
 function ask(prompt: string): any {
     return {
@@ -16,10 +26,13 @@ function ask(prompt: string): any {
     }
 }
 
-const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-const getImageQuery = (query: string) =>
-    fetch(new Request(proxyUrl + `https://api.duckduckgo.com/?q=${query}&format=json&skip_disambig=1`,
-        { headers: { 'Origin': 'http://localhost:3000' } })).then(data => data.json());
+// options: https://picsum.photos/images
+// https://unsplash.com/developers
+// https://source.unsplash.com/
+// const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+// const getImageQuery = (query: string) =>
+//     fetch(new Request(`https://source.unsplash.com/weekly?${query}`,
+//         { headers: { 'Origin': 'http://localhost:3000', 'Content-Type': 'image/jpeg' } })).then(data => data.blob());
 
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
     initial: 'init',
@@ -42,12 +55,13 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 RECOGNISED: [
                     {
                         target: 'image',
-                        cond: (context) => context.recResult == "image",
+                        cond: (context) => getGrammarResult(context.recResult) == "image",
                     },
                     {
                         target: 'mode',
-                        cond: (context) => context.recResult == "mode",
-                    }
+                        cond: (context) => getGrammarResult(context.recResult) == "mode",
+                    },
+                    { target: ".prompt" }
                 ]
             },
             states: {
@@ -60,34 +74,44 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 RECOGNISED: ".afterAnswer"
             },
             states: {
-                ...ask("What animal would you like to see?"),
+                ...ask("What would you like to see a picture of?"),
                 // a state to inform user to wait for result
                 afterAnswer: {
                     entry: send((context) => ({
                         type: "SPEAK",
                         value: `Good choice. Give me just a second and I will get an image of that for you.`
                     })),
-                    on: { ENDSPEECH: "query" }
-                },
-                query: {
-                    invoke: {
-                        id: 'duck',
-                        src: (context, event) => getImageQuery(context.recResult),
-                        onDone: {
-                            target: 'change',
-                            actions: assign((context, event) => {
+                    on: {
+                        ENDSPEECH: {
+                            target: "change",
+                            actions: assign((context) => {
                                 return {
-                                    image: "http://duckduckgo.com" + event.data.Image
+                                    image: "https://source.unsplash.com/weekly?" + context.recResult
                                 }
                             }),
-                            cond: (context, event) => event.data.Image !== undefined
-                        },
-                        onError: {
-                            target: 'error',
-                            actions: (context, event) => console.log(event.data)
                         }
                     }
                 },
+                // query: {
+                //     invoke: {
+                //         id: 'duck',
+                //         src: (context, event) => getImageQuery(context.recResult),
+                //         onDone: {
+                //             target: 'change',
+                //             actions: assign((context, event) => {
+                //                 console.log(event)
+                //                 return {
+                //                     image: ""
+                //                 }
+                //             }),
+                //             cond: (context, event) => event.data.Image !== undefined
+                //         },
+                //         onError: {
+                //             target: 'error',
+                //             actions: (context, event) => console.log(event.data)
+                //         }
+                //     }
+                // },
                 change: {
                     entry: "changeImage",
                     always: "confirm",
