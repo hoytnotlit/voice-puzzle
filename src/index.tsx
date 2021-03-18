@@ -58,11 +58,10 @@ const machine = Machine<SDSContext, any, SDSEvent>(
                                 actions: [
                                     cancel(
                                         "maxsp"
-                                    ) /*, assign((context: SDSContext) => { return { prompts: 0 } })*/,
+                                    ),
                                 ],
                                 target: "idle",
-                            },
-                            MAXSPEECH: "idle"
+                            }
                         },
                         states: {
                             progress: {},
@@ -186,7 +185,6 @@ function App() {
                     if (degree === 0) finishedPiecesCount++;
 
                     // in hard mode allow user to try only as many times as there are pieces
-                    // TODO is there a better way to handle winning other than sending two events?
                     // trigger win or continue event based on count of "finished" pieces 
                     if (context.mode === "hard" && context.moves === piecesCount)
                         send("LOSE");
@@ -200,21 +198,26 @@ function App() {
                 const board = document.getElementById("board");
                 const labels = document.getElementById("labels");
                 const info = document.getElementById("info");
+
                 if (board) {
                     board.classList.add("playing");
                     labels.classList.remove("hidden");
                     info.classList.remove("hidden");
 
                     const pieces = board.children;
-                    // TODO include 0 here or not?
-                    const degrees = [0, 90, 180, 270];
+
+                    let degrees = [90, 180, 270];
+                    // include 0 degrees (no rotation) only in normal mode
+                    if (context.mode !== "hard") {
+                        degrees.push(0);
+                    }
 
                     // TODO make demo settings that can be toggled on/off
                     // some values to use for demoing so solving won't take forever
                     // const demoValue = 2; 
                     // finishedPieces = piecesCount - demoValue;
 
-                    // use real value 
+                    // use real value
 
                     for (let i = 0; i < pieces.length; i++) {
                         const htmlElement = document.getElementById(pieces[i].id);
@@ -360,19 +363,3 @@ function getDegree(currDegree: number, degreeToRotate: number, direction: string
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(<App />, rootElement);
-
-/* RASA API
- *  */
-// const proxyurl = "https://cors-anywhere.herokuapp.com/";
-// const rasaurl = 'https://gussuvmi-rasa-nlu.herokuapp.com/model/parse';
-// const origin = location.origin;
-
-// export const nluRequest = (text: string) =>
-//     fetch(new Request(proxyurl + rasaurl, {
-//         method: 'POST',
-//         headers: {
-//             'Origin': origin //'http://maraev.me'
-//         }, // only required with proxy
-//         body: `{"text": "${text}"}`
-//     }))
-//         .then(data => data.json());

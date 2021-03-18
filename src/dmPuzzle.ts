@@ -1,6 +1,6 @@
 import { MachineConfig, send, Action, assign, TransitionConfigOrTarget } from "xstate";
 
-// use srgs grammar - TODO or maybe rasa would be handier?
+// use srgs grammar
 import { loadGrammar } from './runparser';
 import { parse } from './chartparser';
 import { grammar } from './grammars/puzzleGrammar';

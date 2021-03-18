@@ -15,7 +15,6 @@ interface SDSContext {
     image: string;
 }
 
-// TODO can event have id eg click event for both settings and start buttons?
 type SDSEvent =
     | { type: 'CLICK' }
     | { type: 'SETTINGS' }
@@ -24,7 +23,6 @@ type SDSEvent =
     | { type: 'LOSE' }
     | { type: 'RECOGNISED' }
     | { type: 'DONE' }
-    | { type: 'MAXSPEECH' }
     | { type: 'ASRRESULT', value: string }
     | { type: 'ENDSPEECH' }
     | { type: 'LISTEN' }
