@@ -29,6 +29,13 @@ function getDefaultStates(prompt: string): any {
                 value: prompt
             })),
         },
+        reprompt: {
+            on: { ENDSPEECH: "listen" },
+            entry: send((context: SDSContext) => ({
+                type: "SPEAK",
+                value: `I heard you say ${context.recResult}. Could you repeat what you mean?`
+            })),
+        },
         listen: {
             entry: send('LISTEN')
         }
@@ -54,8 +61,9 @@ function getDefaultEvents(help_msg: string): any {
             actions: assign((context: SDSContext) => { return { help_msg: help_msg } }),
             target: "#root.dm.help"
         },
+        // reprompt on unrecognised
         {
-            target: ".prompt",
+            target: ".reprompt",
             cond: (context: SDSContext) => commands.indexOf(context.recResult) < 0,
         }
     ]
@@ -116,7 +124,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                         {
                             target: '#root.dm.select',
                             cond: (context) => context.piece !== undefined,
-                        }
+                        },
+                        // go back to piece state if it has not been specified
+                        // TODO in case of "right" reset the direction too
+                        { target: "piece" }
                     ]
                 },
                 piece: {
@@ -202,7 +213,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             piece: undefined,
                             degree: undefined,
                             direction: undefined,
-                            moves: context.moves ? context.moves+1 : 1
+                            moves: context.moves ? context.moves + 1 : 1
                         }
                     }),
                 },
