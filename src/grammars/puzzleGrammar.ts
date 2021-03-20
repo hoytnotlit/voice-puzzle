@@ -15,13 +15,16 @@ export const grammar = `<grammar root="puzzleMove">
 <rule id="piece">
    <one-of>
       <item>top left<tag>out="top-left";</tag></item> 
-      <item>top center<tag>out="top-center";</tag></item> 
+      <item>top center<tag>out="top-center";</tag></item>
+      <item>top centre<tag>out="top-center";</tag></item>
       <item>top right<tag>out="top-right";</tag></item> 
       <item>middle left<tag>out="middle-left";</tag></item> 
       <item>middle center<tag>out="middle-center";</tag></item> 
+      <item>middle centre<tag>out="middle-center";</tag></item> 
       <item>middle right<tag>out="middle-right";</tag></item> 
       <item>bottom left<tag>out="bottom-left";</tag></item> 
       <item>bottom center<tag>out="bottom-center";</tag></item> 
+      <item>bottom centre<tag>out="bottom-center";</tag></item> 
       <item>bottom right<tag>out="bottom-right";</tag></item> 
    </one-of>
 </rule>
