@@ -42,7 +42,6 @@ function getDefaultStates(prompt: string): any {
     }
 }
 
-// TODO what is the type really?
 function getDefaultEvents(help_msg: string): any {
     return [
         {
@@ -192,6 +191,10 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                 ...getDefaultStates("You used up all your turns! Do you want to start over?")
             }
         },
+        afterRotate: {
+            on: { ENDSPEECH: "play" },
+            entry: say("There you go! Let's continue.")
+        },
         rotate: {
             on: {
                 WIN: {
@@ -206,7 +209,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                     }),
                 },
                 CONTINUE: {
-                    target: "play",
+                    target: "afterRotate",
                     actions: assign((context) => {
                         // reset moves after each turn
                         return {
