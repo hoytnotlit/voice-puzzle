@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/voice-puzzle/static/css/main.945d6988.chunk.css",
-    "main.js": "/voice-puzzle/static/js/main.1d1d8879.chunk.js",
-    "main.js.map": "/voice-puzzle/static/js/main.1d1d8879.chunk.js.map",
+    "main.js": "/voice-puzzle/static/js/main.b1c6208f.chunk.js",
+    "main.js.map": "/voice-puzzle/static/js/main.b1c6208f.chunk.js.map",
     "runtime-main.js": "/voice-puzzle/static/js/runtime-main.41f73b28.js",
     "runtime-main.js.map": "/voice-puzzle/static/js/runtime-main.41f73b28.js.map",
     "static/js/2.48a6707b.chunk.js": "/voice-puzzle/static/js/2.48a6707b.chunk.js",
@@ -16,6 +16,6 @@
     "static/js/runtime-main.41f73b28.js",
     "static/js/2.48a6707b.chunk.js",
     "static/css/main.945d6988.chunk.css",
-    "static/js/main.1d1d8879.chunk.js"
+    "static/js/main.b1c6208f.chunk.js"
   ]
 }
