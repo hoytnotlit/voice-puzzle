@@ -1,4 +1,4 @@
-# Voice puzzle - final project for course LT2216 spring 2021 (gussuvmi)
+Voice puzzle - final project for course LT2216 spring 2021 (gussuvmi)
 
 Pieces of a puzzle are rotated randomly. The player must rotate the pieces back in place using voice commands only. One should indicate the following:
 - The piece to rotate
