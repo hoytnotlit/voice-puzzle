@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/voice-puzzle/static/css/main.945d6988.chunk.css",
-    "main.js": "/voice-puzzle/static/js/main.b1c6208f.chunk.js",
-    "main.js.map": "/voice-puzzle/static/js/main.b1c6208f.chunk.js.map",
+    "main.css": "/voice-puzzle/static/css/main.891b69c3.chunk.css",
+    "main.js": "/voice-puzzle/static/js/main.3f41f66b.chunk.js",
+    "main.js.map": "/voice-puzzle/static/js/main.3f41f66b.chunk.js.map",
     "runtime-main.js": "/voice-puzzle/static/js/runtime-main.41f73b28.js",
     "runtime-main.js.map": "/voice-puzzle/static/js/runtime-main.41f73b28.js.map",
     "static/js/2.48a6707b.chunk.js": "/voice-puzzle/static/js/2.48a6707b.chunk.js",
     "static/js/2.48a6707b.chunk.js.map": "/voice-puzzle/static/js/2.48a6707b.chunk.js.map",
     "index.html": "/voice-puzzle/index.html",
-    "static/css/main.945d6988.chunk.css.map": "/voice-puzzle/static/css/main.945d6988.chunk.css.map",
+    "static/css/main.891b69c3.chunk.css.map": "/voice-puzzle/static/css/main.891b69c3.chunk.css.map",
     "static/js/2.48a6707b.chunk.js.LICENSE.txt": "/voice-puzzle/static/js/2.48a6707b.chunk.js.LICENSE.txt",
     "static/media/styles.scss": "/voice-puzzle/static/media/default-img.75638ffd.jpg"
   },
   "entrypoints": [
     "static/js/runtime-main.41f73b28.js",
     "static/js/2.48a6707b.chunk.js",
-    "static/css/main.945d6988.chunk.css",
-    "static/js/main.b1c6208f.chunk.js"
+    "static/css/main.891b69c3.chunk.css",
+    "static/js/main.3f41f66b.chunk.js"
   ]
 }
