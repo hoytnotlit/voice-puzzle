@@ -1,2 +1,12 @@
-Voice command puzzle - final project for course LT2216 spring 2021
+# Voice puzzle - final project for course LT2216 spring 2021 (gussuvmi)
 
+Pieces of a puzzle are rotated randomly. The player must rotate the pieces back in place using voice commands only. One should indicate the following:
+- The piece to rotate
+- How much to rotate (once, twice, three times/90, 180, 270 degrees)
+- Direction to rotate (clockwise/counter clockwise)
+
+The player can say everything in one utterance or parts only. The system will ask for missing information.
+
+The player can choose to play in “hard”-mode, which means that they only have a limited amount of turns - every rotation must be correct. 
+
+The player can also choose a different images for the puzzle.
