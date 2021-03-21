@@ -4,7 +4,6 @@ declare module 'react-speech-kit';
 
 interface SDSContext {
     recResult: string;
-    nluData: any;
     ttsAgenda: string;
     piece: string;
     degree: number;
@@ -13,6 +12,7 @@ interface SDSContext {
     moves: number;
     help_msg: string;
     image: string;
+    pieceSelected: boolean;
 }
 
 type SDSEvent =
@@ -22,7 +22,6 @@ type SDSEvent =
     | { type: 'CONTINUE' }
     | { type: 'LOSE' }
     | { type: 'RECOGNISED' }
-    | { type: 'DONE' }
     | { type: 'ASRRESULT', value: string }
     | { type: 'ENDSPEECH' }
     | { type: 'LISTEN' }

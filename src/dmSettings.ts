@@ -1,5 +1,4 @@
 import { MachineConfig, send, assign } from "xstate";
-
 import { loadGrammar } from './runparser';
 import { parse } from './chartparser';
 import { grammar } from './grammars/settingsGrammar';
@@ -25,14 +24,6 @@ function ask(prompt: string): any {
         }
     }
 }
-
-// options: https://picsum.photos/images
-// https://unsplash.com/developers
-// https://source.unsplash.com/
-// const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-// const getImageQuery = (query: string) =>
-//     fetch(new Request(`https://source.unsplash.com/weekly?${query}`,
-//         { headers: { 'Origin': 'http://localhost:3000', 'Content-Type': 'image/jpeg' } })).then(data => data.blob());
 
 export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
     initial: 'init',
@@ -92,26 +83,6 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                         }
                     }
                 },
-                // query: {
-                //     invoke: {
-                //         id: 'duck',
-                //         src: (context, event) => getImageQuery(context.recResult),
-                //         onDone: {
-                //             target: 'change',
-                //             actions: assign((context, event) => {
-                //                 console.log(event)
-                //                 return {
-                //                     image: ""
-                //                 }
-                //             }),
-                //             cond: (context, event) => event.data.Image !== undefined
-                //         },
-                //         onError: {
-                //             target: 'error',
-                //             actions: (context, event) => console.log(event.data)
-                //         }
-                //     }
-                // },
                 change: {
                     entry: "changeImage",
                     always: "confirm",

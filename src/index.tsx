@@ -88,9 +88,9 @@ const machine = Machine<SDSContext, any, SDSEvent>(
             test: () => {
                 console.log("test");
             },
-            logIntent: (context: SDSContext) => {
-                console.log("<< NLU intent: " + context.nluData.intent.name);
-            },
+            // logIntent: (context: SDSContext) => {
+            //     console.log("<< NLU intent: " + context.nluData.intent.name);
+            // },
         },
     }
 );
@@ -103,23 +103,13 @@ const ReactiveButton = (props: Props): JSX.Element => {
     switch (true) {
         case props.state.matches({ asrtts: "recognising" }):
             return (
-                <button
-                    type="button"
-                    className="glow-on-hover"
-                    style={{ animation: "glowing 20s linear" }}
-                    {...props}
-                >
+                <button type="button"{...props}>
                     Listening...
                 </button>
             );
         case props.state.matches({ asrtts: "speaking" }):
             return (
-                <button
-                    type="button"
-                    className="glow-on-hover"
-                    style={{ animation: "bordering 1s infinite" }}
-                    {...props}
-                >
+                <button type="button" {...props}>
                     Speaking...
                 </button>
             );
@@ -132,6 +122,7 @@ const ReactiveButton = (props: Props): JSX.Element => {
     }
 };
 
+// track when user has solved the puzzle
 let finishedPiecesCount = 0
 const piecesCount = 9
 
@@ -212,13 +203,6 @@ function App() {
                         degrees.push(0);
                     }
 
-                    // TODO make demo settings that can be toggled on/off
-                    // some values to use for demoing so solving won't take forever
-                    // const demoValue = 2; 
-                    // finishedPieces = piecesCount - demoValue;
-
-                    // use real value
-
                     for (let i = 0; i < pieces.length; i++) {
                         const htmlElement = document.getElementById(pieces[i].id);
 
@@ -282,7 +266,6 @@ function App() {
 
     return (
         <div className="App">
-            {/* <input type="checkbox">Demo mode</input> */}
             <div className="btn-wrapper">
                 <ReactiveButton state={current} onClick={() => send("CLICK")} />
                 <button type="button" className="settings-btn" onClick={() => send("SETTINGS")}>Settings</button>
@@ -294,7 +277,7 @@ function App() {
             <div className="info hidden" id="info">
                 <span>
                     Say <b>help</b> at any point for a help message.
-                    Want to stop playing? Say <b>reset</b> and the pieces will be organized for you.
+                    Want to stop playing? Say <b>reset</b> or <b>stop</b> and the pieces will be organized for you.
                 </span>
             </div>
 

@@ -44,10 +44,22 @@ export const grammar = `<grammar root="puzzleMove">
       <item>180°<tag>out=180;</tag></item>
       <item>270°<tag>out=270;</tag></item>
       <item>once <tag>out=90;</tag></item>
+      <item>one <tag>out=90;</tag></item>
+      <item>ones <tag>out=90;</tag></item>
+      <item>1 <tag>out=90;</tag></item>
       <item>one time <tag>out=90;</tag></item>
+      <item>1 time <tag>out=90;</tag></item>
+      <item>1 * <tag>out=90;</tag></item>
       <item>twice <tag>out=180;</tag></item>
+      <item>two <tag>out=180;</tag></item>
+      <item>2 <tag>out=180;</tag></item>
       <item>two times <tag>out=180;</tag></item>
+      <item>2 times <tag>out=180;</tag></item>
+      <item>2 * <tag>out=180;</tag></item>
       <item>three times <tag>out=270;</tag></item>
+      <item>3 times <tag>out=270;</tag></item>
+      <item>3 <tag>out=270;</tag></item>
+      <item>3 * <tag>out=270;</tag></item>
    </one-of>
 </rule>
 <rule id="direction">

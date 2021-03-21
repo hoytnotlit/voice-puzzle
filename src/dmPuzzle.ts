@@ -1,14 +1,10 @@
 import { MachineConfig, send, Action, assign, TransitionConfigOrTarget } from "xstate";
-
-// redeploy
-
-// use srgs grammar
 import { loadGrammar } from './runparser';
 import { parse } from './chartparser';
 import { grammar } from './grammars/puzzleGrammar';
 
 const gram = loadGrammar(grammar);
-const commands = ["help", "reset"];
+const commands = ["help", "reset", "stop"];
 
 function getGrammarResult(recResult: string) {
     let res = parse(recResult.toLowerCase().split(/\s+/), gram);
@@ -90,7 +86,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
         play: {
             on: {
                 RECOGNISED: {
-                    cond: (context) => context.recResult === "reset",
+                    cond: (context) => context.recResult === "reset" || context.recResult === "stop",
                     target: "#root.dm.reset"
                 }
             },
@@ -116,19 +112,34 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             cond: (context) => context.piece !== undefined
                                 && context.degree === 180
                         },
-                        // TODO select piece in case like "top left 90 degrees"
                         {
                             target: '#play.direction',
                             cond: (context) => context.piece !== undefined
+                                && context.pieceSelected === true
                                 && context.degree !== undefined
                         },
                         {
+                            target: '#play.degree',
+                            cond: (context) => context.piece !== undefined
+                                && context.pieceSelected === true
+                        },
+                        // select piece also in case like "top left 90 degrees" as the first utterance
+                        {
                             target: '#root.dm.select',
-                            cond: (context) => context.piece !== undefined,
+                            cond: (context) => context.piece !== undefined ||
+                                (context.piece !== undefined
+                                    && context.degree !== undefined),
                         },
                         // go back to piece state if it has not been specified
-                        // TODO in case of "right" reset the direction too
-                        { target: "piece" }
+                        // in case of only "right" reset the direction
+                        {
+                            target: "piece",
+                            actions: assign((context) => {
+                                return {
+                                    direction: undefined
+                                }
+                            })
+                        }
                     ]
                 },
                 piece: {
@@ -206,7 +217,8 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             piece: undefined,
                             degree: undefined,
                             direction: undefined,
-                            moves: undefined
+                            moves: undefined,
+                            pieceSelected: false
                         }
                     }),
                 },
@@ -218,6 +230,7 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             piece: undefined,
                             degree: undefined,
                             direction: undefined,
+                            pieceSelected: false,
                             moves: context.moves ? context.moves + 1 : 1
                         }
                     }),
@@ -229,7 +242,8 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
                             piece: undefined,
                             degree: undefined,
                             direction: undefined,
-                            moves: undefined
+                            moves: undefined,
+                            pieceSelected: false
                         }
                     }),
                 }
@@ -238,7 +252,14 @@ export const dmMachine: MachineConfig<SDSContext, any, SDSEvent> = ({
         },
         select: {
             entry: "selectPiece",
-            always: "play.degree"
+            always: {
+                target: "play.redirect",
+                actions: assign((context) => {
+                    return {
+                        pieceSelected: true
+                    }
+                }),
+            }
         },
         shuffle: {
             entry: "shufflePieces",
